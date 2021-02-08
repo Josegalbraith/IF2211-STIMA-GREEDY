@@ -4,15 +4,15 @@ Kahfi Soobhan Zulkifli 13519012 <br />
 Jose Galbraith Hasintongan 13519022 <br />
 Ryandito Diandaru 13519157
 
-Himpunan Kandidat: 
-Seluruh cacing yang aktif
+Himpunan Kandidat: <br />
+Seluruh cacing yang aktif <br />
 
-Himpunan Solusi:
-Cacing musuh
+Himpunan Solusi: <br />
+Cacing musuh <br />
 
-Fungsi Solusi:
-Memeriksa apakah cacing yang dipilih itu cacing musuh
-
+Fungsi Solusi: <br />
+Memeriksa apakah cacing yang dipilih itu cacing musuh <br />
+ 
 Fungsi Seleksi: <br />
 - Tergantung role cacing <br />
   - Komando: <br />
@@ -27,8 +27,8 @@ Fungsi Seleksi: <br />
     Jika HP rendah, select agent buat move/banana bomb. <br />
     Jika Agent keos, select commando buat nmove/shoot. <br />
 
-Fungsi Kelayakan:
-Cacing yang dipilih HPnya rendah atau jaraknya dekat
+Fungsi Kelayakan: <br />
+Cacing yang dipilih (HPnya rendah atau jaraknya dekat) dan tidak berada di zona lava <br />
 
-Fungsi Obyektif:
-Meminimumkan jumlah langkah-langkah untuk membunuh semua cacing
+Fungsi Obyektif: <br />
+Meminimumkan jumlah langkah-langkah untuk membunuh semua cacing <br />
