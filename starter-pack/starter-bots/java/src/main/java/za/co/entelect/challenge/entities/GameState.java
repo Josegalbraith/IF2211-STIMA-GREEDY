@@ -10,6 +10,12 @@ public class GameState {
     @SerializedName("maxRounds")
     public int maxRounds;
 
+    @SerializedName("pushbackDamage")
+    public int pushbackDamage;
+
+    @SerializedName("lavaDamage")
+    public int lavaDamage;
+
     @SerializedName("mapSize")
     public int mapSize;
 
@@ -27,4 +33,7 @@ public class GameState {
 
     @SerializedName("map")
     public Cell[][] map;
+
+    @SerializedName("count")
+    public int count;
 }
