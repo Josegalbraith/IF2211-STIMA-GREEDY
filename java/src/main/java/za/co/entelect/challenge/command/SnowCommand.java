@@ -5,7 +5,7 @@ public class SnowCommand extends Weapon{
     private final int x;
     private final int y;
 
-    public SnowCommand(int x, int y,int count) {
+    public SnowCommand(int x, int y) {
         this.x = x;
         this.y = y;
 	count +=1;
@@ -13,6 +13,6 @@ public class SnowCommand extends Weapon{
 
     @Override
     public String render() {
-        return String.format("snow %d %d", x, y, count);
+        return String.format("snow %d %d", x, y);
     }
 }
