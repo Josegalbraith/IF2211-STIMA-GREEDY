@@ -7,7 +7,6 @@ import za.co.entelect.challenge.enums.Direction;
 import za.co.entelect.challenge.enums.Profession;
 
 import java.util.*;
-import java.util.regex.Pos;
 import java.util.stream.Collectors;
 
 public class Bot {
@@ -144,33 +143,35 @@ public class Bot {
         return Direction.valueOf(builder.toString());
     }
 
-    private boolean FriendlyFireSnowball(Position targetPosition, MyPlayer myPlayer) {
-        Direction direction;
+    private boolean FriendlyFireSnowball(Position a, MyPlayer myPlayer) {
+        boolean valid = true;
 
         for (int i = 0; i < 3; i++) { //Ngeloop seluruh worm yang dimiliki
-            if (myPlayer.worms[i].position.x <= targetPostion.x + 1 || //Ngecek di daerah range 1
-                myPlayer.worms[i].position.x >= targetPostion.x - 1 ||
-                myPlayer.worms[i].position.y <= targetPostion.y + 1 ||
-                myPlayer.worms[i].position.x >= targetPostion.x - 1) {
-                    return false;
+            if (myPlayer.worms[i].position.x <= a.x + 1 || //Ngecek di daerah range 1
+                myPlayer.worms[i].position.x >= a.x - 1 ||
+                myPlayer.worms[i].position.y <= a.y + 1 ||
+                myPlayer.worms[i].position.y >= a.y - 1) {
+                    valid = false;
                 }                
         }
+        return valid;
     }
 
-    private boolean FriendlyFireBanana(Position targetPosition, MyPlayer myPlayer) {
-        Direction direction;
+    private boolean FriendlyFireBanana(Position a, MyPlayer myPlayer) {
+        boolean valid = true;
 
-        if (FriendlyFireSnowball(targetPosition, myPlayer)) { //Ngecek apakah di range 1 terlebih dahulu, pakai fungsi lama
+        if (FriendlyFireSnowball(a, myPlayer)) { //Ngecek apakah di range 1 terlebih dahulu, pakai fungsi lama
             for (int i = 0; i < 3; i++) { //Loop seluruh cacing yang kita punya
-                if (((myPlayer.worms[i].position.x == targetPostion.x + 2 || //Ngecek apakah di horizontal/vertikal range 2
-                    myPlayer.worms[i].position.x == targetPostion.x - 2) &&
-                    myPlayer.worms[i].position.y == targetPostion.y) ||
-                    ((myPlayer.worms[i].position.y == targetPostion.y + 2 ||
-                    myPlayer.worms[i].position.y == targetPostion.y - 2) &&
-                    myPlayer.worms[i].position.x == targetPostion.x)) {
-                        return false;
+                if (((myPlayer.worms[i].position.x == a.x + 2 || //Ngecek apakah di horizontal/vertikal range 2
+                    myPlayer.worms[i].position.x == a.x - 2) &&
+                    myPlayer.worms[i].position.y == a.y) ||
+                    ((myPlayer.worms[i].position.y == a.y + 2 ||
+                    myPlayer.worms[i].position.y == a.y - 2) &&
+                    myPlayer.worms[i].position.x == a.x)) {
+                        valid = false;
                 }                
-            }           
+            }
         }
+        return valid;
     }
 }
