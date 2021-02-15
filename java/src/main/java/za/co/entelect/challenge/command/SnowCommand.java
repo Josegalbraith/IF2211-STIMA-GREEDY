@@ -1,6 +1,6 @@
 package za.co.entelect.challenge.command;
 
-public class SnowCommand implements Command {
+public class SnowCommand extends Weapon{
 
     private final int x;
     private final int y;
