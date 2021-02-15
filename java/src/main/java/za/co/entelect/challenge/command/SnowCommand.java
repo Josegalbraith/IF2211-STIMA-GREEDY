@@ -8,10 +8,11 @@ public class SnowCommand extends Weapon{
     public SnowCommand(int x, int y,int count) {
         this.x = x;
         this.y = y;
+	count +=1;
     }
 
     @Override
     public String render() {
-        return String.format("snow %d %d", x, y);
+        return String.format("snow %d %d", x, y, count);
     }
 }
