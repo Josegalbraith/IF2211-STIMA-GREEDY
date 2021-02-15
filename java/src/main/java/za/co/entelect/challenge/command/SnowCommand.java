@@ -5,7 +5,7 @@ public class SnowCommand extends Weapon{
     private final int x;
     private final int y;
 
-    public SnowCommand(int x, int y) {
+    public SnowCommand(int x, int y,int count) {
         this.x = x;
         this.y = y;
     }
