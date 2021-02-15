@@ -147,8 +147,8 @@ public class Bot {
     private boolean FriendlyFireSnowball(Position targetPosition, MyPlayer myPlayer) {
         Direction direction;
 
-        for (int i = 0; i < 3; i++) {
-            if (myPlayer.worms[i].position.x <= targetPostion.x + 1 || 
+        for (int i = 0; i < 3; i++) { //Ngeloop seluruh worm yang dimiliki
+            if (myPlayer.worms[i].position.x <= targetPostion.x + 1 || //Ngecek di daerah range 1
                 myPlayer.worms[i].position.x >= targetPostion.x - 1 ||
                 myPlayer.worms[i].position.y <= targetPostion.y + 1 ||
                 myPlayer.worms[i].position.x >= targetPostion.x - 1) {
@@ -160,12 +160,14 @@ public class Bot {
     private boolean FriendlyFireBanana(Position targetPosition, MyPlayer myPlayer) {
         Direction direction;
 
-        if (FriendlyFireSnowball(targetPosition, myPlayer)) {
-            for (int i = 0; i < 3; i++) { 
-                if ((myPlayer.worms[i].position.x == targetPostion.x + 1 || 
-                    myPlayer.worms[i].position.x == targetPostion.x - 1) &&
-                    (myPlayer.worms[i].position.y == targetPostion.y + 1 ||
-                    myPlayer.worms[i].position.x == targetPostion.x - 1)) {
+        if (FriendlyFireSnowball(targetPosition, myPlayer)) { //Ngecek apakah di range 1 terlebih dahulu, pakai fungsi lama
+            for (int i = 0; i < 3; i++) { //Loop seluruh cacing yang kita punya
+                if (((myPlayer.worms[i].position.x == targetPostion.x + 2 || //Ngecek apakah di horizontal/vertikal range 2
+                    myPlayer.worms[i].position.x == targetPostion.x - 2) &&
+                    myPlayer.worms[i].position.y == targetPostion.y) ||
+                    ((myPlayer.worms[i].position.y == targetPostion.y + 2 ||
+                    myPlayer.worms[i].position.y == targetPostion.y - 2) &&
+                    myPlayer.worms[i].position.x == targetPostion.x)) {
                         return false;
                 }                
             }           
