@@ -8,7 +8,7 @@ public class SnowCommand extends Weapon{
     public SnowCommand(int x, int y) {
         this.x = x;
         this.y = y;
-	count +=1;
+
     }
 
     @Override
