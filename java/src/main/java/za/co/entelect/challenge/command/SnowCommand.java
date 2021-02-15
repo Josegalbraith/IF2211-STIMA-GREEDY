@@ -1,4 +1,4 @@
-package za.co.entelect.challenge.command;
+import za.co.entelect.challenge.entities;
 
 public class SnowCommand extends Weapon{
 
