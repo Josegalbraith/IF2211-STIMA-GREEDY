@@ -1,6 +1,6 @@
-import za.co.entelect.challenge.entities;
+package za.co.entelect.challenge.command;
 
-public class SnowCommand extends Weapon{
+public class SnowCommand implements Command {
 
     private final int x;
     private final int y;
@@ -8,7 +8,6 @@ public class SnowCommand extends Weapon{
     public SnowCommand(int x, int y) {
         this.x = x;
         this.y = y;
-
     }
 
     @Override
