@@ -4,8 +4,10 @@ import za.co.entelect.challenge.command.*;
 import za.co.entelect.challenge.entities.*;
 import za.co.entelect.challenge.enums.CellType;
 import za.co.entelect.challenge.enums.Direction;
+import za.co.entelect.challenge.enums.Profession;
 
 import java.util.*;
+import java.util.regex.Pos;
 import java.util.stream.Collectors;
 
 public class Bot {
@@ -140,5 +142,33 @@ public class Bot {
         }
 
         return Direction.valueOf(builder.toString());
+    }
+
+    private boolean FriendlyFireSnowball(Position targetPosition, MyPlayer myPlayer) {
+        Direction direction;
+
+        for (int i = 0; i < 3; i++) {
+            if (myPlayer.worms[i].position.x <= targetPostion.x + 1 || 
+                myPlayer.worms[i].position.x >= targetPostion.x - 1 ||
+                myPlayer.worms[i].position.y <= targetPostion.y + 1 ||
+                myPlayer.worms[i].position.x >= targetPostion.x - 1) {
+                    return false;
+                }                
+        }
+    }
+
+    private boolean FriendlyFireBanana(Position targetPosition, MyPlayer myPlayer) {
+        Direction direction;
+
+        if (FriendlyFireSnowball(targetPosition, myPlayer)) {
+            for (int i = 0; i < 3; i++) { 
+                if ((myPlayer.worms[i].position.x == targetPostion.x + 1 || 
+                    myPlayer.worms[i].position.x == targetPostion.x - 1) &&
+                    (myPlayer.worms[i].position.y == targetPostion.y + 1 ||
+                    myPlayer.worms[i].position.x == targetPostion.x - 1)) {
+                        return false;
+                }                
+            }           
+        }
     }
 }
