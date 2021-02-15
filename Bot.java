@@ -46,6 +46,31 @@ public class Bot {
             return new MoveCommand(block.x, block.y);
         } else if (block.type == CellType.DIRT) {
             return new DigCommand(block.x, block.y);
+        } else if (block.type == CellType.LAVA){
+            int safety = 9;
+            int checksafe, movex = block.x, movey=block.y;
+            for (int i = currentWorm.position.x; i <= currentWorm.position.x + 1; i++) {
+                for (int j = currentWorm.position.y - 1; j <= currentWorm.position.y + 1; j++) {
+                    // Don't include the current position
+                    if (i != currentWorm.position.x && j != currentWorm.position.y && isValidCoordinate(i, j)) {
+                        List<Cell> checkloc =getSurroundingCells(i, j);
+                        Cell checkblock;
+                        checksafe = 0;
+                        for (int k = 0; k <= 7; k++) {
+                            checkblock = checkloc.get(k);
+                            if(checkblock.type == CellType.LAVA){
+                                checksafe++;
+                            }
+                        }
+                        if(checksafe <= safety){
+                            safety = checksafe;
+                            movex = i;
+                            movey = j;
+                        }
+                    }
+                }
+            }
+            return new MoveCommand(movex, movey);
         }
 
         return new DoNothingCommand();
