@@ -4,6 +4,7 @@ import za.co.entelect.challenge.command.*;
 import za.co.entelect.challenge.entities.*;
 import za.co.entelect.challenge.enums.CellType;
 import za.co.entelect.challenge.enums.Direction;
+import za.co.entelect.challenge.enums.PowerUpType;
 import za.co.entelect.challenge.enums.Profession;
 
 import java.util.*;
@@ -31,31 +32,41 @@ public class Bot {
     }
 
     public Command run() {
-        GameState gameState = new GameState();
-
-        if (currentWorm.profession != Profession.COMMANDO) { //bukan commando
-            for(int i = 0; i<=2; i++){
-                if  (gameState.myPlayer.worms[i].profession == Profession.COMMANDO){ //mencari worm commando
-                 Worm commando = gameState.myPlayer.worms[i]; //worm commando disimpan sebagai sebuah variabel
-                    Direction direction = resolveDirection(currentWorm.position,commando.position); 
-                return new MoveCommand(direction.x,direction.y);
-                }
-            }
-         }
-
-        else{ 
-            Worm enemyWorm = getFirstWormInRange();
-            if (enemyWorm != null) {
-                Direction direction = resolveDirection(currentWorm.position = Profession.Agent, enemyWorm.position);
-                return new ShootCommand(direction);
-	        }
-        }
+        //Tembak kalo ada yg di range
         Worm enemyWorm = getFirstWormInRange();
         if (enemyWorm != null) {
             Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
             return new ShootCommand(direction);
         }
+        
+        //check surrounding healthpack
+        Cell cellHP = nearestHealthPack(currentWorm.position.x, currentWorm.position.y);
+        if(cellHP != null && gameState.currentRound <= 100){
+            Position target = new Position();
+            target.x = cellHP.x;
+            target.y = cellHP.y;
+            Direction direction = resolveDirection(currentWorm.position, target);
+            Cell dest = gameState.map[currentWorm.position.x+direction.x][currentWorm.position.y+direction.y];
+            if (dest.type == CellType.AIR) {
+                return new MoveCommand(dest.x, dest.y);
+            } else if (dest.type == CellType.DIRT) {
+                return new DigCommand(dest.x, dest.y);
+            }
+        }
 
+        //Go to middle
+        Position mid = new Position();
+        mid.x = 16;
+        mid.y = 15;
+        Direction arah = resolveDirection(currentWorm.position, mid);
+        Cell tuju = gameState.map[currentWorm.position.y+arah.y][currentWorm.position.x+arah.x];
+        if (tuju.type == CellType.AIR) {
+            return new MoveCommand(currentWorm.position.x+arah.x, currentWorm.position.y+arah.y);
+        } else if (tuju.type == CellType.DIRT) {
+            return new DigCommand(currentWorm.position.x+arah.x, currentWorm.position.y+arah.y);
+        }
+
+        //Random
         List<Cell> surroundingBlocks = getSurroundingCells(currentWorm.position.x, currentWorm.position.y);
         int cellIdx = random.nextInt(surroundingBlocks.size());
 
@@ -207,5 +218,17 @@ public class Bot {
             }
         }
         return valid;
+    }
+
+    private Cell nearestHealthPack(int x, int y){
+        for (int i = x - 2; i <= x + 2; i++) {
+            for (int j = y - 2; j <= y + 2; j++) {
+                // Don't include the current position
+                if (i != x && j != y && isValidCoordinate(i, j) && gameState.map[j][i].powerUp != null) {
+                    return gameState.map[j][i];
+                }
+            }
+        }
+        return null;
     }
 }
