@@ -32,11 +32,53 @@ public class Bot {
     }
 
     public Command run() {
+
         //Tembak kalo ada yg di range
         Worm enemyWorm = getFirstWormInRange();
         if (enemyWorm != null) {
             Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
             return new ShootCommand(direction);
+        }
+
+        //Commando berburu
+        if(currentWorm.profession == Profession.COMMANDO){
+            int idxOpponent = 2;
+            Worm prey = gameState.opponents[0].worms[idxOpponent];
+            if(prey.health <= 0){
+                idxOpponent--;
+                prey = gameState.opponents[0].worms[idxOpponent];
+                if(prey.health <= 0){
+                    idxOpponent--;
+                    prey = gameState.opponents[0].worms[idxOpponent];
+                }
+            }
+            Direction direction = resolveDirection(currentWorm.position, prey.position);
+            
+            Cell target = gameState.map[currentWorm.position.y+direction.y][currentWorm.position.x+direction.x];
+            if(target.type == CellType.AIR) {
+                return new MoveCommand(target.x, target.y);
+            } else if(target.type == CellType.DIRT) {
+                return new DigCommand(target.x, target.y);
+            }
+        }
+
+        //Not commando, mendekat ke commando
+        if (currentWorm.profession != Profession.COMMANDO) {
+            Worm commando = gameState.myPlayer.worms[0];
+            if(euclideanDistance(currentWorm.position.x, currentWorm.position.y, commando.position.x, commando.position.y) >= 3){
+                Direction direction = resolveDirection(currentWorm.position, commando.position);
+
+                int targetx = currentWorm.position.x+direction.x;
+                int targety = currentWorm.position.y+direction.y;
+
+                Cell target = gameState.map[targety][targetx];
+
+                if(target.type == CellType.AIR) {
+                    return new MoveCommand(targetx, targety);
+                } else if(target.type == CellType.DIRT) {
+                    return new DigCommand(targetx, targety);
+                }
+            }
         }
         
         //check surrounding healthpack
@@ -55,16 +97,16 @@ public class Bot {
         }
 
         //Go to middle
-        Position mid = new Position();
-        mid.x = 16;
-        mid.y = 15;
-        Direction arah = resolveDirection(currentWorm.position, mid);
-        Cell tuju = gameState.map[currentWorm.position.y+arah.y][currentWorm.position.x+arah.x];
-        if (tuju.type == CellType.AIR) {
-            return new MoveCommand(currentWorm.position.x+arah.x, currentWorm.position.y+arah.y);
-        } else if (tuju.type == CellType.DIRT) {
-            return new DigCommand(currentWorm.position.x+arah.x, currentWorm.position.y+arah.y);
-        }
+        // Position mid = new Position();
+        // mid.x = 16;
+        // mid.y = 15;
+        // Direction arah = resolveDirection(currentWorm.position, mid);
+        // Cell tuju = gameState.map[currentWorm.position.y+arah.y][currentWorm.position.x+arah.x];
+        // if (tuju.type == CellType.AIR) {
+        //     return new MoveCommand(currentWorm.position.x+arah.x, currentWorm.position.y+arah.y);
+        // } else if (tuju.type == CellType.DIRT) {
+        //     return new DigCommand(currentWorm.position.x+arah.x, currentWorm.position.y+arah.y);
+        // }
 
         //Random
         List<Cell> surroundingBlocks = getSurroundingCells(currentWorm.position.x, currentWorm.position.y);
@@ -231,4 +273,39 @@ public class Bot {
         }
         return null;
     }
+
+    private boolean SnowballValid(Position enemy, MyPlayer myPlayer) { //ngecek apakah mungkin buat lempar snowball
+        boolean valid = true;
+
+        int distance = euclideanDistance(enemy.x, enemy.y, currentWorm.position.x, currentWorm.position.y);
+
+        if (distance > 5) {
+            valid = false;
+        }
+
+        if (!FriendlyFireSnowball(enemy, myPlayer)) {
+            valid = false;
+        }
+
+        return valid;
+
+    }
+
+    private boolean BananaBombValid(Position enemy, MyPlayer myPlayer) { //ngecek apakah mungkin buat lempar snowball
+        boolean valid = true;
+
+        int distance = euclideanDistance(enemy.x, enemy.y, currentWorm.position.x, currentWorm.position.y);
+
+        if (distance > 5) {
+            valid = false;
+        }
+
+        if (!FriendlyFireBanana(enemy, myPlayer)) {
+            valid = false;
+        }
+
+        return valid;
+
+    }
+
 }
