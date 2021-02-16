@@ -31,7 +31,25 @@ public class Bot {
     }
 
     public Command run() {
+        GameState gameState = new GameState();
 
+        if (currentWorm.profession != Profession.COMMANDO) { //bukan commando
+            for(int i = 0; i<=2; i++){
+                if  (gameState.myPlayer.worms[i].profession == Profession.COMMANDO){ //mencari worm commando
+                 Worm commando = gameState.myPlayer.worms[i]; //worm commando disimpan sebagai sebuah variabel
+                    Direction direction = resolveDirection(currentWorm.position,commando.position); 
+                return new MoveCommand(direction.x,direction.y);
+                }
+            }
+         }
+
+        else{ 
+            Worm enemyWorm = getFirstWormInRange();
+            if (enemyWorm != null) {
+                Direction direction = resolveDirection(currentWorm.position = Profession.Agent, enemyWorm.position);
+                return new ShootCommand(direction);
+	        }
+        }
         Worm enemyWorm = getFirstWormInRange();
         if (enemyWorm != null) {
             Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
