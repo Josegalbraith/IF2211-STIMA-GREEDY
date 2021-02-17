@@ -12,6 +12,6 @@ public class SnowCommand implements Command {
 
     @Override
     public String render() {
-        return String.format("snow %d %d", x, y);
+        return String.format("snowball %d %d", x, y);
     }
 }

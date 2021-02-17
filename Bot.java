@@ -34,7 +34,21 @@ public class Bot {
     public Command run() {
 
         //Tembak kalo ada yg di range
-        Worm enemyWorm = getFirstWormInRange();
+        Worm enemyWorm = getFirstWormInRange(); //weapon biasa
+        Worm mangsa = getFirstWormInRangeWeapon(currentWorm); //snow atau banana
+
+        if (mangsa != null && mangsa.health > 0 && currentWorm.profession == Profession.TECHNOLOGIST) {
+            if (currentWorm.snowball.count > 0) {
+                return new SnowCommand(mangsa.position.x, mangsa.position.y);
+            }
+        }
+
+        if (mangsa != null && mangsa.health > 0 && currentWorm.profession == Profession.AGENT) {
+            if (currentWorm.banana.count > 0) {
+                return new BananaCommand(mangsa.position.x, mangsa.position.y);
+            }
+        }
+
         if (enemyWorm != null && enemyWorm.health > 0) {
             Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
             return new ShootCommand(direction);
@@ -151,6 +165,32 @@ public class Bot {
             if (cells.contains(enemyPosition)) {
                 return enemyWorm;
             }
+        }
+
+        return null;
+    }
+
+    private Worm getFirstWormInRangeWeapon(MyWorm cur) {
+
+        /*
+        Set<String> cells = constructFireDirectionLines(5)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(cell -> String.format("%d_%d", cell.x, cell.y))
+                .collect(Collectors.toSet());
+        */
+
+        for (Worm enemyWorm : opponent.worms) {
+
+            if (euclideanDistance(cur.position.x, cur.position.y, enemyWorm.position.x, enemyWorm.position.y) <= 5) {
+                return enemyWorm;
+            }
+            /*
+            String enemyPosition = String.format("%d_%d", enemyWorm.position.x, enemyWorm.position.y);
+            if (cells.contains(enemyPosition)) {
+                return enemyWorm;
+            }
+             */
         }
 
         return null;
