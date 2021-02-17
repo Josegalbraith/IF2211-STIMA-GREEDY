@@ -35,7 +35,7 @@ public class Bot {
 
         //Tembak kalo ada yg di range
         Worm enemyWorm = getFirstWormInRange();
-        if (enemyWorm != null) {
+        if (enemyWorm != null && enemyWorm.health > 0) {
             Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
             return new ShootCommand(direction);
         }
