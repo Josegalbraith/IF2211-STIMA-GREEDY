@@ -34,24 +34,69 @@ public class Bot {
     public Command run() {
 
         //Tembak kalo ada yg di range
-        Worm enemyWorm = getFirstWormInRange(); //weapon biasa
-        Worm mangsa = getFirstWormInRangeWeapon(currentWorm); //snow atau banana
-
+        Worm enemyWorm = getFirstWormInRange();
+        Worm mangsa = getFirstWormInRangeWeapon(currentWorm);
         if (mangsa != null && mangsa.health > 0 && currentWorm.profession == Profession.TECHNOLOGIST) {
-            if (currentWorm.snowball.count > 0) {
+            if (currentWorm.snowball.count > 0 && mangsa.roundsUntilUnfrozen == 0) {
                 return new SnowCommand(mangsa.position.x, mangsa.position.y);
             }
         }
-
         if (mangsa != null && mangsa.health > 0 && currentWorm.profession == Profession.AGENT) {
             if (currentWorm.banana.count > 0) {
                 return new BananaCommand(mangsa.position.x, mangsa.position.y);
             }
         }
-
         if (enemyWorm != null && enemyWorm.health > 0) {
             Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
             return new ShootCommand(direction);
+        }
+
+        //Check ada healtpack ato ngga, kalo ada coba ambil dulu
+        Cell hpackcell = getHPack();
+        if(hpackcell != null && currentWorm.profession == Profession.COMMANDO){
+            Position mid = new Position();
+            mid.x = hpackcell.x;
+            mid.y = hpackcell.y;
+            Direction arah = resolveDirection(currentWorm.position, mid);
+            Cell tuju = gameState.map[currentWorm.position.y+arah.y][currentWorm.position.x+arah.x];
+            if (tuju.type == CellType.AIR) {
+                return new MoveCommand(currentWorm.position.x+arah.x, currentWorm.position.y+arah.y);
+            } else if (tuju.type == CellType.DIRT) {
+                return new DigCommand(currentWorm.position.x+arah.x, currentWorm.position.y+arah.y);
+            }
+        }
+
+        //Not commando, mendekat ke commando
+        if (currentWorm.profession != Profession.COMMANDO) {
+            Worm commando = gameState.myPlayer.worms[0];
+            if(euclideanDistance(currentWorm.position.x, currentWorm.position.y, commando.position.x, commando.position.y) >= 5){
+                Direction direction = resolveDirection(currentWorm.position, commando.position);
+
+                int targetx = currentWorm.position.x+direction.x;
+                int targety = currentWorm.position.y+direction.y;
+
+                Cell target = gameState.map[targety][targetx];
+
+                if(target.type == CellType.AIR) {
+                    return new MoveCommand(targetx, targety);
+                } else if(target.type == CellType.DIRT) {
+                    return new DigCommand(targetx, targety);
+                }
+            }
+            else{
+                Worm cacingMusuh = getFirstWormInRangeCustom();
+                if (cacingMusuh != null && cacingMusuh.health > 0) {
+                    Worm cacingMusuhTembak = getFirstWormInRange();
+                    if(cacingMusuhTembak != null){
+                        Direction direction = resolveDirection(currentWorm.position, cacingMusuhTembak.position);
+                        return new ShootCommand(direction);
+                    }
+                    else{
+                        Direction direction = resolveDirection(currentWorm.position, cacingMusuh.position);
+                        return new MoveCommand(currentWorm.position.x+direction.x, currentWorm.position.y+direction.y);
+                    }
+                }
+            }
         }
 
         //Commando berburu
@@ -75,40 +120,21 @@ public class Bot {
                 return new DigCommand(target.x, target.y);
             }
         }
-
-        //Not commando, mendekat ke commando
-        if (currentWorm.profession != Profession.COMMANDO) {
-            Worm commando = gameState.myPlayer.worms[0];
-            if(euclideanDistance(currentWorm.position.x, currentWorm.position.y, commando.position.x, commando.position.y) >= 3){
-                Direction direction = resolveDirection(currentWorm.position, commando.position);
-
-                int targetx = currentWorm.position.x+direction.x;
-                int targety = currentWorm.position.y+direction.y;
-
-                Cell target = gameState.map[targety][targetx];
-
-                if(target.type == CellType.AIR) {
-                    return new MoveCommand(targetx, targety);
-                } else if(target.type == CellType.DIRT) {
-                    return new DigCommand(targetx, targety);
-                }
-            }
-        }
         
         //check surrounding healthpack
-        Cell cellHP = nearestHealthPack(currentWorm.position.x, currentWorm.position.y);
-        if(cellHP != null && gameState.currentRound <= 100){
-            Position target = new Position();
-            target.x = cellHP.x;
-            target.y = cellHP.y;
-            Direction direction = resolveDirection(currentWorm.position, target);
-            Cell dest = gameState.map[currentWorm.position.x+direction.x][currentWorm.position.y+direction.y];
-            if (dest.type == CellType.AIR) {
-                return new MoveCommand(dest.x, dest.y);
-            } else if (dest.type == CellType.DIRT) {
-                return new DigCommand(dest.x, dest.y);
-            }
-        }
+        // Cell cellHP = nearestHealthPack(currentWorm.position.x, currentWorm.position.y);
+        // if(cellHP != null && gameState.currentRound <= 100){
+        //     Position target = new Position();
+        //     target.x = cellHP.x;
+        //     target.y = cellHP.y;
+        //     Direction direction = resolveDirection(currentWorm.position, target);
+        //     Cell dest = gameState.map[currentWorm.position.x+direction.x][currentWorm.position.y+direction.y];
+        //     if (dest.type == CellType.AIR) {
+        //         return new MoveCommand(dest.x, dest.y);
+        //     } else if (dest.type == CellType.DIRT) {
+        //         return new DigCommand(dest.x, dest.y);
+        //     }
+        // }
 
         //Go to middle
         // Position mid = new Position();
@@ -155,6 +181,24 @@ public class Bot {
     private Worm getFirstWormInRange() {
 
         Set<String> cells = constructFireDirectionLines(currentWorm.weapon.range)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(cell -> String.format("%d_%d", cell.x, cell.y))
+                .collect(Collectors.toSet());
+
+        for (Worm enemyWorm : opponent.worms) {
+            String enemyPosition = String.format("%d_%d", enemyWorm.position.x, enemyWorm.position.y);
+            if (cells.contains(enemyPosition)) {
+                return enemyWorm;
+            }
+        }
+
+        return null;
+    }
+
+    private Worm getFirstWormInRangeCustom() {
+
+        Set<String> cells = constructFireDirectionLines(6)
                 .stream()
                 .flatMap(Collection::stream)
                 .map(cell -> String.format("%d_%d", cell.x, cell.y))
@@ -348,4 +392,14 @@ public class Bot {
 
     }
 
+    private Cell getHPack(){
+        for(int i = 14; i <= 20; i++){
+            for(int j = 14; j <= 20; j++){
+                if(gameState.map[j][i].powerUp != null){
+                    return gameState.map[j][i];
+                }
+            }
+        }
+        return null;
+    }
 }

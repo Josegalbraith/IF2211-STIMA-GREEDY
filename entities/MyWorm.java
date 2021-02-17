@@ -10,4 +10,10 @@ public class MyWorm extends Worm {
 
     @SerializedName("profession")
     public Profession profession;
+
+    @SerializedName("bananaBombs")
+    public Banana banana;
+
+    @SerializedName("snowballs")
+    public Snowball snowball;
 }
