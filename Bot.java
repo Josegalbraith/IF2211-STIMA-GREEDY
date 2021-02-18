@@ -33,23 +33,109 @@ public class Bot {
 
     public Command run() {
 
-        //Tembak kalo ada yg di range
+        //Tembak kalo ada yg di range, Fungsi Kelayakan
         Worm enemyWorm = getFirstWormInRange();
         Worm mangsa = getFirstWormInRangeWeapon(currentWorm);
         Worm commando = gameState.myPlayer.worms[0];
+        Worm technologistenemy = gameState.opponents[0].worms[2];
+        Worm agentenemy = gameState.opponents[0].worms[1];
+
         if (mangsa != null && mangsa.health > 0 && currentWorm.profession == Profession.TECHNOLOGIST) {
             if (currentWorm.snowball.count > 0 && mangsa.roundsUntilUnfrozen == 0) {
                 return new SnowCommand(mangsa.position.x, mangsa.position.y);
             }
         }
         if (mangsa != null && mangsa.health > 0 && currentWorm.profession == Profession.AGENT) {
-            if (currentWorm.banana.count > 0) {
+            if (currentWorm.banana.count > 0 && technologistenemy.health <= 0) {
                 return new BananaCommand(mangsa.position.x, mangsa.position.y);
             }
         }
         if (enemyWorm != null && enemyWorm.health > 0) {
             Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
             return new ShootCommand(direction);
+        }
+
+        //Commando berburu
+        if(currentWorm.profession == Profession.COMMANDO){
+            int idxOpponent = 2;
+            Worm prey = gameState.opponents[0].worms[idxOpponent]; //technologist
+            if(prey.health <= 0){
+                idxOpponent--;
+                prey = gameState.opponents[0].worms[idxOpponent]; //agent
+                if(prey.health <= 0){
+                    idxOpponent--;
+                    prey = gameState.opponents[0].worms[idxOpponent]; //commando
+                }
+            }
+            Direction direction = resolveDirection(currentWorm.position, prey.position);
+
+            Cell target = gameState.map[currentWorm.position.y+direction.y][currentWorm.position.x+direction.x];
+            if(target.type == CellType.AIR) {
+                return new MoveCommand(target.x, target.y);
+            } else if(target.type == CellType.DIRT) {
+                return new DigCommand(target.x, target.y);
+            }
+        }
+
+        //Agent memburu technologist
+        if (currentWorm.profession == Profession.AGENT && technologistenemy.health > 0) {
+            Worm cacingMusuh = getFirstWormInRange();
+            if (cacingMusuh != null && cacingMusuh.health > 0) {
+                Direction direction = resolveDirection(currentWorm.position, cacingMusuh.position);
+                return new ShootCommand(direction);
+            } else {
+                if (euclideanDistance(currentWorm.position.x, currentWorm.position.y, technologistenemy.position.x, technologistenemy.position.y) > 4) {
+                    Direction direction = resolveDirection(currentWorm.position, technologistenemy.position);
+
+                    int targetx = currentWorm.position.x + direction.x;
+                    int targety = currentWorm.position.y + direction.y;
+
+                    Cell target = gameState.map[targety][targetx];
+
+                    if (target.type == CellType.AIR) {
+                        return new MoveCommand(targetx, targety);
+                    } else if (target.type == CellType.DIRT) {
+                        return new DigCommand(targetx, targety);
+                    }
+                }
+            }
+        }
+
+        //Technologist memburu agent enemy
+        if (currentWorm.profession == Profession.AGENT && agentenemy.health > 0) {
+            Worm cacingMusuh = getFirstWormInRange();
+
+            if (cacingMusuh != null && cacingMusuh.health > 0 && cacingMusuh.roundsUntilUnfrozen == 0 &&
+                    euclideanDistance(currentWorm.position.x, currentWorm.position.y, cacingMusuh.position.x, cacingMusuh.position.y) <= 5 ) {
+
+                Direction direction = resolveDirection(currentWorm.position, cacingMusuh.position);
+                int targetx = currentWorm.position.x + direction.x;
+                int targety = currentWorm.position.y + direction.y;
+
+                Cell target = gameState.map[targety][targetx];
+
+                return new SnowCommand(targetx, targety);
+            }
+
+            if (cacingMusuh != null && cacingMusuh.health > 0 && cacingMusuh.roundsUntilUnfrozen > 0) {
+                Direction direction = resolveDirection(currentWorm.position, cacingMusuh.position);
+                return new ShootCommand(direction);
+            } else {
+                if (euclideanDistance(currentWorm.position.x, currentWorm.position.y, agentenemy.position.x, agentenemy.position.y) > 4) {
+                    Direction direction = resolveDirection(currentWorm.position, agentenemy.position);
+
+                    int targetx = currentWorm.position.x + direction.x;
+                    int targety = currentWorm.position.y + direction.y;
+
+                    Cell target = gameState.map[targety][targetx];
+
+                    if (target.type == CellType.AIR) {
+                        return new MoveCommand(targetx, targety);
+                    } else if (target.type == CellType.DIRT) {
+                        return new DigCommand(targetx, targety);
+                    }
+                }
+            }
         }
 
         //Check ada healtpack ato ngga, kalo ada coba ambil dulu
@@ -111,28 +197,6 @@ public class Bot {
                         return new MoveCommand(currentWorm.position.x+direction.x, currentWorm.position.y+direction.y);
                     }
                 }
-            }
-        }
-
-        //Commando berburu
-        if(currentWorm.profession == Profession.COMMANDO){
-            int idxOpponent = 2;
-            Worm prey = gameState.opponents[0].worms[idxOpponent]; //technologist
-            if(prey.health <= 0){
-                idxOpponent--;
-                prey = gameState.opponents[0].worms[idxOpponent]; //agent
-                if(prey.health <= 0){
-                    idxOpponent--;
-                    prey = gameState.opponents[0].worms[idxOpponent]; //commando
-                }
-            }
-            Direction direction = resolveDirection(currentWorm.position, prey.position);
-            
-            Cell target = gameState.map[currentWorm.position.y+direction.y][currentWorm.position.x+direction.x];
-            if(target.type == CellType.AIR) {
-                return new MoveCommand(target.x, target.y);
-            } else if(target.type == CellType.DIRT) {
-                return new DigCommand(target.x, target.y);
             }
         }
         
