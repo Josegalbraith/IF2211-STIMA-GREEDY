@@ -121,7 +121,7 @@ public class Bot {
             if (cacingMusuh != null && cacingMusuh.health > 0 && cacingMusuh.roundsUntilUnfrozen > 0) {
                 Direction direction = resolveDirection(currentWorm.position, cacingMusuh.position);
                 return new ShootCommand(direction);
-            } else { //jika tidak dalam range, maka mendekat
+            } else { //jika tidak dalam range, maka mendekat dengan prioritas profesi musuh yang dianggap paling berbahaya
                 if (euclideanDistance(currentWorm.position.x, currentWorm.position.y, agentenemy.position.x, agentenemy.position.y) > 4 && agentenemy.health>0) {
                     Direction direction = resolveDirection(currentWorm.position, agentenemy.position);
 
